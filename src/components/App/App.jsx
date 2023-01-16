@@ -4,8 +4,15 @@ import toast, { Toaster } from 'react-hot-toast';
 
 import { ContactForm } from 'components/ContactForm';
 import { ContactList } from 'components/ContactList';
+import { Filter } from 'components/Filter/Filter'
 
-import { Container } from './App.styled';
+import {
+  Container,
+  Title,
+  SubTitle,
+  FilterText,
+  ContactText,
+} from './App.styled';
 
 export class App extends Component {
   state = {
@@ -18,7 +25,7 @@ export class App extends Component {
     filter: '',
   };
 
-  addContactHandler = data => {
+  addContact = data => {
     const { contacts } = this.state;
     const newContact = {
       id: nanoid(3),
@@ -30,16 +37,14 @@ export class App extends Component {
       ({ name }) => dataNameNormalized === name.toLowerCase()
     );
     const notifyError = () =>
-      toast.error(`"${newContact.name}" is already in the Phonebook!`);
+      toast.error(`"${newContact.name}" is already in contacts`);
     const notifySucces = () =>
       toast.success(`"${newContact.name}" successfully added!`);
 
     if (anyName) {
-      // console.log('Такий контакт вже є в контактах');
       notifyError();
       return;
     }
-    // console.log('Додаю в контакти');
     notifySucces();
     this.setState(prevState => ({
       contacts: [...prevState.contacts, newContact],
@@ -52,22 +57,49 @@ export class App extends Component {
     }));
   };
 
+  changeFilter = evt => {
+    this.setState({ filter: evt.currentTarget.value });
+  };
+
+  getVisibleContact = () => {
+    const { contacts, filter } = this.state;
+
+    const filterNormalized = filter.toLowerCase().trim();
+
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filterNormalized)
+    );
+  };
+
   render() {
-    
+    const { filter } = this.state;
+
+    const visibleContacts = this.getVisibleContact();
+
     return (
       <Container>
         <Toaster position="top-center" reverseOrder={false} />
-        <section>
-          <h1>Phonebook</h1>
-          <ContactForm onSubmit={this.addContactHandler} />
-        </section>
-        <section>
-          <h2>Contacts</h2>
-          <ContactList
-            contacts={this.state.contacts}
-            deleteContact={this.deleteContact}
-          />
-        </section>
+        <Title>Phonebook</Title>
+        <ContactForm onSubmit={this.addContact} />
+        <SubTitle>Contacts</SubTitle>
+        {visibleContacts.length || filter ? (
+          visibleContacts.length ? (
+            <>
+              <Filter value={filter} onChange={this.changeFilter} />
+              <ContactList
+                contacts={visibleContacts}
+                onDeleteContact={this.deleteContact}
+              />
+            </>
+          ) : (
+            <>
+              <Filter value={filter} onChange={this.changeFilter} />
+              <FilterText>No matches found for "{filter}"!</FilterText>
+            </>
+          )
+        ) : (
+          <ContactText>There are no phone numbers in Contacts!</ContactText>
+        )}
       </Container>
     );
   }

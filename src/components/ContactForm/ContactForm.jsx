@@ -2,12 +2,29 @@ import PropTypes from 'prop-types';
 import * as yup from 'yup';
 import 'yup-phone';
 
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { Formik, ErrorMessage } from 'formik';
+
+import {
+  FormContact,
+  FormLabel,
+  Input,
+  ErrorText,
+  AddBtn,
+} from './ContactForm.styled';
 
 let schema = yup.object().shape({
   name: yup.string().min(3).required(),
   number: yup.string().phone('UA').required(),
 });
+
+const FormError = ({ name }) => {
+  return (
+    <ErrorMessage
+      name={name}
+      render={message => <ErrorText>{message}</ErrorText>}
+    />
+  );
+};
 
 const initialValues = {
   name: '',
@@ -26,10 +43,10 @@ export const ContactForm = ({ onSubmit }) => {
       validationSchema={schema}
       onSubmit={addContact}
     >
-      <Form>
-        <label htmlFor="name">
+      <FormContact>
+        <FormLabel htmlFor="name">
           Name
-          <Field
+          <Input
             type="text"
             name="name"
             pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
@@ -37,11 +54,11 @@ export const ContactForm = ({ onSubmit }) => {
             placeholder="Name"
             required
           />
-          <ErrorMessage name="name" />
-        </label>
-        <label htmlFor="number">
+          <FormError name="name" />
+        </FormLabel>
+        <FormLabel htmlFor="number">
           Number
-          <Field
+          <Input
             type="tel"
             name="number"
             pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
@@ -49,10 +66,10 @@ export const ContactForm = ({ onSubmit }) => {
             placeholder="Number"
             required
           />
-          <ErrorMessage name="number" />
-        </label>
-        <button type="submit">Add contact</button>
-      </Form>
+          <FormError name="number" />
+        </FormLabel>
+        <AddBtn type="submit">Add contact</AddBtn>
+      </FormContact>
     </Formik>
   );
 };
